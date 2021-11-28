@@ -1,0 +1,94 @@
+%LAB 3 EXERCISE 4 SUBPOINT A
+%Write a predicate to determine the sum of two numbers written in list representation
+
+%SUMMARY
+%The addition of the two numbers represented as lists is done by:
+%	1) reversing the lists
+%	2) summing the elements of the two lists (by position) into a third list
+%	3) processing the third list so that any element greater than 10 (with previous
+%		remainder) is recalculated to be modulo 10 and then 1 is added to the next
+%		element
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Function to reverse a given list
+reverseListCore([], Result, Result).
+
+reverseListCore([Head|Tail] , TempResult, Result):-
+	reverseListCore(Tail, [Head|TempResult], Result).
+
+reverseList([Head|Tail], Result) :-
+	reverseListCore(Tail, [Head], Result).
+
+%Mathemathical model:
+%reverseListCore(l1..ln, temp) =
+%	temp, n = 0;
+%	reverseListCore(l2..ln, l1 U temp).
+%
+%reverseList(l1..ln) =
+%	reverseListCore(l2..ln, l1).
+
+%flow=(i, i/o)/
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Function to sum the elements of two lists
+sumTwoLists([Head1|Tail1], [Head2|Tail2], [Sum|TailRest]):-
+	Sum is Head1 + Head2,
+	sumTwoLists(Tail1, Tail2, TailRest).
+
+sumTwoLists([], [], []).
+
+sumTwoLists(List, [], List).
+
+sumTwoLists([], List, List).
+
+%Mathemathical model:
+% sumTwoLists(l1..lx, m1..my) =
+%	[], x = 0, y = 0;
+%	l1..lx, y = 0;
+%	m1..my, x=0;
+%   (l1 + m1) U sumTwoLists(l2..lx, m2..my).
+
+%flow(i, i, i/o)/
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Function to make a list contain only digits, properly adding remainders
+processRemainderCore([Head|Tail], Flag, [AdjustedHead|TailRest]):-
+	Sum is Head + Flag,
+	AdjustedHead is mod(Sum, 10),
+	(Sum > 9 ->
+		NewFlag is 1;
+	NewFlag is 0
+	),
+	processRemainderCore(Tail, NewFlag, TailRest).
+
+processRemainderCore([], 1, [1]).
+
+processRemainderCore([], 0, []).
+
+processRemainder(List, Result):-
+	processRemainderCore(List, 0, Result).
+
+%Mathemathical model
+%processRemainderCore(l1..ln, flag) =
+%	[], flag = 0, n = 0;
+%	[1], flag = 1, n = 0;
+%	[(flag+l1)%10] U processRemainderCore(l2..ln, newFlag), newFlag =
+%															1, flag+l1 > 9
+%	.														2, flag+l1 < 9
+%processRemainder(l1..ln) =
+%	processRemainderCore(l1..ln, 0).
+
+%flow(i, i/o)/
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Main (wrapper) function
+sumListNumbers(List1, List2, Result):-
+	reverseList(List1, ReversedList1),
+	reverseList(List2, ReversedList2),
+	sumTwoLists(ReversedList1, ReversedList2, ReversedSum),
+	processRemainder(ReversedSum, ReversedResult),
+	reverseList(ReversedResult, Result).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
